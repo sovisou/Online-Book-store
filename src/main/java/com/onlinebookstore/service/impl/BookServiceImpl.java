@@ -4,15 +4,14 @@ import com.onlinebookstore.model.Book;
 import com.onlinebookstore.repository.BookRepository;
 import com.onlinebookstore.service.BookService;
 import java.util.List;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
-
-    public BookServiceImpl(BookRepository bookRepository) {
-        this.bookRepository = bookRepository;
-    }
 
     @Override
     public Book save(Book book) {
