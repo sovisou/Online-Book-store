@@ -12,4 +12,5 @@ public class BookDto {
     private BigDecimal price;
     private String description;
     private String coverImage;
+    private boolean isDeleted;
 }
