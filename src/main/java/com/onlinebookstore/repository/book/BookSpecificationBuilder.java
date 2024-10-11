@@ -1,4 +1,4 @@
-package com.onlinebookstore.repository.book.spec;
+package com.onlinebookstore.repository.book;
 
 import com.onlinebookstore.dto.BookSearchParameters;
 import com.onlinebookstore.model.Book;
@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Component
 public class BookSpecificationBuilder implements SpecificationBuilder<Book> {
+    private static final String TITLE_FIELD = "title";
+    private static final String AUTHOR_FIELD = "title";
     private final SpecificationProviderManager<Book> bookSpecificationProviderManager;
 
     @Override
@@ -18,12 +20,12 @@ public class BookSpecificationBuilder implements SpecificationBuilder<Book> {
         Specification<Book> specification = Specification.where(null);
         if (searchParameters.titles() != null && searchParameters.titles().length > 0) {
             specification = specification
-                    .and(bookSpecificationProviderManager.getSpecificationProvider("title")
+                    .and(bookSpecificationProviderManager.getSpecificationProvider(TITLE_FIELD)
                             .getSpecification(searchParameters.titles()));
         }
         if (searchParameters.authors() != null && searchParameters.authors().length > 0) {
             specification = specification
-                    .and(bookSpecificationProviderManager.getSpecificationProvider("author")
+                    .and(bookSpecificationProviderManager.getSpecificationProvider(AUTHOR_FIELD)
                             .getSpecification(searchParameters.authors()));
         }
         return specification;

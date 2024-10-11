@@ -1,4 +1,4 @@
-package com.onlinebookstore.repository.book;
+package com.onlinebookstore.repository.book.spec;
 
 import com.onlinebookstore.model.Book;
 import com.onlinebookstore.repository.SpecificationProvider;
@@ -8,13 +8,15 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class TitleSpecificationProvider implements SpecificationProvider<Book> {
+    private static final String TITLE_FIELD = "title";
+
     @Override
     public String getKey() {
-        return "title";
+        return TITLE_FIELD;
     }
 
     public Specification<Book> getSpecification(String[] params) {
         return (root, query, criteriaBuilder) ->
-                root.get("title").in(Arrays.stream(params).toArray());
+                root.get(TITLE_FIELD).in(Arrays.stream(params).toArray());
     }
 }

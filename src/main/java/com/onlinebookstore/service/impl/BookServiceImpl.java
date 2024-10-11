@@ -7,7 +7,7 @@ import com.onlinebookstore.exception.EntityNotFoundException;
 import com.onlinebookstore.mapper.BookMapper;
 import com.onlinebookstore.model.Book;
 import com.onlinebookstore.repository.book.BookRepository;
-import com.onlinebookstore.repository.book.spec.BookSpecificationBuilder;
+import com.onlinebookstore.repository.book.BookSpecificationBuilder;
 import com.onlinebookstore.service.BookService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
