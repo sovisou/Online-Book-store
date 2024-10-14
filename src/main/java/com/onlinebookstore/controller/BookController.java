@@ -29,7 +29,7 @@ public class BookController {
         return bookService.findAll();
     }
 
-    @GetMapping("/id")
+    @GetMapping("/{id}")
     public BookDto findById(@PathVariable Long id) {
         return bookService.findById(id);
     }
