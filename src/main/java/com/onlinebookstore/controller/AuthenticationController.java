@@ -4,6 +4,8 @@ import com.onlinebookstore.dto.user.UserRegistrationRequestDto;
 import com.onlinebookstore.dto.user.UserResponseDto;
 import com.onlinebookstore.exception.RegistrationException;
 import com.onlinebookstore.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,9 +19,10 @@ public class AuthenticationController {
     private final UserService userService;
 
     @PostMapping("/registration")
-    public UserResponseDto registerUser(@RequestBody UserRegistrationRequestDto requestDto)
+    @Operation(summary = "User registration",
+            description = "Creates a new user and returns information about it")
+    public UserResponseDto registerUser(@Valid @RequestBody UserRegistrationRequestDto requestDto)
             throws RegistrationException {
         return userService.register(requestDto);
     }
 }
-
