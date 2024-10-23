@@ -3,7 +3,7 @@ package com.onlinebookstore.repository.book;
 import static com.onlinebookstore.repository.BookFields.AUTHOR;
 import static com.onlinebookstore.repository.BookFields.TITLE;
 
-import com.onlinebookstore.dto.BookSearchParameters;
+import com.onlinebookstore.dto.book.BookSearchParameters;
 import com.onlinebookstore.model.Book;
 import com.onlinebookstore.repository.SpecificationBuilder;
 import com.onlinebookstore.repository.SpecificationProviderManager;
