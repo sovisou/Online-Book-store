@@ -45,10 +45,19 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
 
     @ExceptionHandler(EntityNotFoundException.class)
     protected ResponseEntity<Object> entityNotFoundException(EntityNotFoundException ex) {
+        return objectResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(RegistrationException.class)
+    protected ResponseEntity<Object> registrationException(RegistrationException ex) {
+        return objectResponseEntity(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    private ResponseEntity<Object> objectResponseEntity(HttpStatus status, String message) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.NOT_FOUND);
-        body.put("message", ex.getMessage());
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+        body.put("status", status.value());
+        body.put("message", message);
+        return new ResponseEntity<>(body, status);
     }
 }
