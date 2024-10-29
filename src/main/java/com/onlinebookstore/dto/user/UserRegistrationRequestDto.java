@@ -19,12 +19,12 @@ public class UserRegistrationRequestDto {
     @Length(min = 8, max = 20)
     private String repeatPassword;
     @NotBlank
-    @Length(min = 10, max = 20)
+    @Length(min = 2, max = 20)
     private String firstName;
     @NotBlank
-    @Length(min = 10, max = 20)
+    @Length(min = 2, max = 20)
     private String lastName;
     @NotBlank
-    @Length(min = 10, max = 100)
+    @Length(min = 6, max = 100)
     private String shippingAddress;
 }
