@@ -34,6 +34,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String lastName;
     private String shippingAddress;
+    @Column(nullable = false, columnDefinition = "TINYINT(1)")
+    private boolean isDeleted;
     @ManyToMany
     @JoinTable(
             name = "users_roles",
@@ -70,5 +72,10 @@ public class User implements UserDetails {
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return !isDeleted;
     }
 }
