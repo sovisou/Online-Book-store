@@ -1,5 +1,6 @@
 package com.onlinebookstore.security;
 
+import com.onlinebookstore.exception.EntityNotFoundException;
 import com.onlinebookstore.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +17,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return userRepository.findByEmail(email)
                 .orElseThrow(
-                        () -> new UsernameNotFoundException("Can't find user by email: " + email));
+                        () -> new EntityNotFoundException("Can't find user by email: " + email));
     }
 }
