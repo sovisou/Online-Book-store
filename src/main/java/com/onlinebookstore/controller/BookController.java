@@ -1,6 +1,7 @@
 package com.onlinebookstore.controller;
 
 import com.onlinebookstore.dto.book.BookDto;
+import com.onlinebookstore.dto.book.BookDtoWithoutCategoryIds;
 import com.onlinebookstore.dto.book.BookSearchParameters;
 import com.onlinebookstore.dto.book.CreateBookRequestDto;
 import com.onlinebookstore.service.BookService;
@@ -77,7 +78,7 @@ public class BookController {
     @PutMapping("/{id}/books")
     @Operation(summary = "Get books by category id",
             description = "Get a list of books by its category identifier")
-    public List getBooksByCategoryId(Long id) {
+    public List<BookDtoWithoutCategoryIds> getBooksByCategoryId(@PathVariable Long id) {
         return bookService.getBooksByCategoryId(id);
     }
 }
