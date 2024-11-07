@@ -8,8 +8,10 @@ import com.onlinebookstore.mapper.BookMapper;
 import com.onlinebookstore.model.Book;
 import com.onlinebookstore.repository.book.BookRepository;
 import com.onlinebookstore.repository.book.BookSpecificationBuilder;
+import com.onlinebookstore.repository.category.CategoryRepository;
 import com.onlinebookstore.service.BookService;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
+    private final CategoryRepository categoryRepository;
     private final BookSpecificationBuilder bookSpecificationBuilder;
 
     @Override
@@ -63,5 +66,13 @@ public class BookServiceImpl implements BookService {
                 .stream()
                 .map(bookMapper::toDto)
                 .toList();
+    }
+
+    @Override
+    public List<BookDto> getBooksByCategoryId(Long categoryId) {
+        List<Book> books = bookRepository.findAllByCategories_Id(categoryId);
+        return books.stream()
+                .map(bookMapper::toDto)
+                .collect(Collectors.toList());
     }
 }

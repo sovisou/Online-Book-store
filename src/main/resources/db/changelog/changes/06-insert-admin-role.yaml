@@ -11,7 +11,7 @@ databaseChangeLog:
                   value: "user1@example.com"
               - column:
                   name: password
-                  value: "$2a$10$B0yjChK4GQIxKnvL4tso0OGMMDRYc8bxiHZ8JkIox0CIphGKSeyGu"
+                  value: "$2a$10$mAmTcyLmqpFQt3bCF7TSNep60brBASr5tKrRjb.Qg/0EKnMK6njay"
               - column:
                   name: first_name
                   value: "User1"

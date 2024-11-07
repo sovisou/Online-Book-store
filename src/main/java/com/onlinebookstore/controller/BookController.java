@@ -73,4 +73,11 @@ public class BookController {
     public List<BookDto> search(BookSearchParameters searchParameters) {
         return bookService.search(searchParameters);
     }
+
+    @PutMapping("/{id}/books")
+    @Operation(summary = "Get books by category id",
+            description = "Get a list of books by its category identifier")
+    public List getBooksByCategoryId(Long id) {
+        return bookService.getBooksByCategoryId(id);
+    }
 }

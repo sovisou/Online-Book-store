@@ -18,4 +18,6 @@ public interface BookService {
     BookDto updateById(Long id, CreateBookRequestDto requestDto);
 
     public List<BookDto> search(BookSearchParameters parameters);
+
+    List<BookDto> getBooksByCategoryId(Long categoryId);
 }
