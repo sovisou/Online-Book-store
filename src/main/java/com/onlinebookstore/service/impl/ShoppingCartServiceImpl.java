@@ -1,6 +1,5 @@
 package com.onlinebookstore.service.impl;
 
-import com.onlinebookstore.dto.cart.CartItemDto;
 import com.onlinebookstore.dto.cart.CartItemUpdateDto;
 import com.onlinebookstore.dto.cart.CreateCartItemRequestDto;
 import com.onlinebookstore.dto.cart.ShoppingCartDto;
@@ -10,6 +9,7 @@ import com.onlinebookstore.mapper.ShoppingCartMapper;
 import com.onlinebookstore.model.Book;
 import com.onlinebookstore.model.CartItem;
 import com.onlinebookstore.model.ShoppingCart;
+import com.onlinebookstore.model.User;
 import com.onlinebookstore.repository.book.BookRepository;
 import com.onlinebookstore.repository.cart.CartItemRepository;
 import com.onlinebookstore.repository.cart.ShoppingCartRepository;
@@ -26,6 +26,13 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     private final BookRepository bookRepository;
     private final ShoppingCartMapper shoppingCartMapper;
     private final CartItemMapper cartItemMapper;
+
+    @Override
+    public void createShoppingCartForUser(User user) {
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setUser(user);
+        shoppingCartRepository.save(shoppingCart);
+    }
 
     @Override
     public ShoppingCartDto getShoppingCartByUserId(Long userId) {
@@ -52,13 +59,14 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
-    public CartItemDto updateCartItem(Long cartItemId, CartItemUpdateDto updateDto) {
+    public ShoppingCartDto updateCartItem(Long cartItemId, CartItemUpdateDto updateDto) {
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new EntityNotFoundException(
                 "Can't find cart with id: " + cartItemId));
         cartItemMapper.updateItemFromDto(updateDto, cartItem);
         cartItemRepository.save(cartItem);
-        return cartItemMapper.toDto(cartItem);
+        ShoppingCart shoppingCart = cartItem.getShoppingCart();
+        return shoppingCartMapper.toDto(shoppingCart);
     }
 
     @Override

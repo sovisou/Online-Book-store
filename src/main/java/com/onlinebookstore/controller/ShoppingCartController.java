@@ -1,6 +1,5 @@
 package com.onlinebookstore.controller;
 
-import com.onlinebookstore.dto.cart.CartItemDto;
 import com.onlinebookstore.dto.cart.CartItemUpdateDto;
 import com.onlinebookstore.dto.cart.CreateCartItemRequestDto;
 import com.onlinebookstore.dto.cart.ShoppingCartDto;
@@ -32,7 +31,7 @@ public class ShoppingCartController {
     @Operation(summary = "Get shopping cart by id",
             description = "Get a shopping cart by its identifier")
     public ShoppingCartDto getShoppingCartByUserId(Authentication authentication) {
-        Long userId = ((User) authentication.getPrincipal()).getId();
+        Long userId = extractUserId(authentication);
         return shoppingCartService.getShoppingCartByUserId(userId);
     }
 
@@ -41,14 +40,14 @@ public class ShoppingCartController {
             description = "Add item to shopping cart")
     public ShoppingCartDto addItemToCart(Authentication authentication,
                                      @RequestBody @Valid CreateCartItemRequestDto requestDto) {
-        Long userId = ((User) authentication.getPrincipal()).getId();
+        Long userId = extractUserId(authentication);
         return shoppingCartService.addCartItem(userId, requestDto);
     }
 
     @PutMapping("items/{cartItemId}")
     @Operation(summary = "Update category by id",
             description = "Update category info by its identifier")
-    public CartItemDto updateCartItemsQuantity(@PathVariable Long cartItemId,
+    public ShoppingCartDto updateCartItemsQuantity(@PathVariable Long cartItemId,
                                       @RequestBody @Valid CartItemUpdateDto updateDto) {
         return shoppingCartService.updateCartItem(cartItemId, updateDto);
     }
@@ -60,5 +59,9 @@ public class ShoppingCartController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteCartItem(@PathVariable Long cartItemId) {
         shoppingCartService.removeCartItem(cartItemId);
+    }
+
+    private Long extractUserId(Authentication authentication) {
+        return ((User) authentication.getPrincipal()).getId();
     }
 }
