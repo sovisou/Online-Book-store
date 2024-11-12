@@ -6,7 +6,9 @@ import com.onlinebookstore.exception.EntityNotFoundException;
 import com.onlinebookstore.exception.RegistrationException;
 import com.onlinebookstore.mapper.UserMapper;
 import com.onlinebookstore.model.Role;
+import com.onlinebookstore.model.ShoppingCart;
 import com.onlinebookstore.model.User;
+import com.onlinebookstore.repository.cart.ShoppingCartRepository;
 import com.onlinebookstore.repository.role.RoleRepository;
 import com.onlinebookstore.repository.user.UserRepository;
 import com.onlinebookstore.service.UserService;
@@ -22,6 +24,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final ShoppingCartRepository shoppingCartRepository;
 
     @Override
     public UserResponseDto register(UserRegistrationRequestDto requestDto)
@@ -34,6 +37,10 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
         user.setRoles(Set.of(roleRepository.findByRole(Role.RoleName.ROLE_USER)
                 .orElseThrow(() -> new EntityNotFoundException("Role USER not found"))));
-        return userMapper.toUserResponse(userRepository.save(user));
+        user = userRepository.save(user);
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setUser(user);
+        shoppingCartRepository.save(shoppingCart);
+        return userMapper.toUserResponse(user);
     }
 }
