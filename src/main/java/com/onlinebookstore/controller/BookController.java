@@ -1,6 +1,7 @@
 package com.onlinebookstore.controller;
 
 import com.onlinebookstore.dto.book.BookDto;
+import com.onlinebookstore.dto.book.BookDtoWithoutCategoryIds;
 import com.onlinebookstore.dto.book.BookSearchParameters;
 import com.onlinebookstore.dto.book.CreateBookRequestDto;
 import com.onlinebookstore.service.BookService;
@@ -72,5 +73,12 @@ public class BookController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public List<BookDto> search(BookSearchParameters searchParameters) {
         return bookService.search(searchParameters);
+    }
+
+    @PutMapping("/{id}/books")
+    @Operation(summary = "Get books by category id",
+            description = "Get a list of books by its category identifier")
+    public List<BookDtoWithoutCategoryIds> getBooksByCategoryId(@PathVariable Long id) {
+        return bookService.getBooksByCategoryId(id);
     }
 }
