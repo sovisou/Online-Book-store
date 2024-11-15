@@ -45,16 +45,18 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Override
     @Transactional
     public ShoppingCartDto addCartItem(Long userId, CreateCartItemRequestDto requestDto) {
-        Long book = requestDto.getBookId();
-        Book bookById = bookRepository.findById(book).orElseThrow(
-                () -> new EntityNotFoundException("Can't get book by id: " + book));
+        Long bookId = requestDto.getBookId();
+        Book bookById = bookRepository.findById(bookId).orElseThrow(
+                () -> new EntityNotFoundException("Can't get book by id: " + bookId));
         ShoppingCart shoppingCart = shoppingCartRepository.findByUserId(userId).orElseThrow(
                 () -> new EntityNotFoundException(
                         "Can't get shopping cart for user with id: " + userId));
         CartItem cartItem = cartItemMapper.toModel(requestDto);
         cartItem.setBook(bookById);
         cartItem.setShoppingCart(shoppingCart);
+        cartItemRepository.save(cartItem);
         shoppingCart.getCartItems().add(cartItem);
+        shoppingCartRepository.save(shoppingCart);
         return getShoppingCartByUserId(userId);
     }
 
