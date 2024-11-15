@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,7 +49,12 @@ public class ShoppingCartController {
     @Operation(summary = "Update category by id",
             description = "Update category info by its identifier")
     public ShoppingCartDto updateCartItemsQuantity(@PathVariable Long cartItemId,
-                                      @RequestBody @Valid CartItemUpdateDto updateDto) {
+                                      @RequestBody @Valid CartItemUpdateDto updateDto,
+                                                   Authentication authentication) {
+        Long userId = extractUserId(authentication);
+        if (!shoppingCartService.isCartItemBelongsToUser(cartItemId, userId)) {
+            throw new AccessDeniedException("Access denied");
+        }
         return shoppingCartService.updateCartItem(cartItemId, updateDto);
     }
 

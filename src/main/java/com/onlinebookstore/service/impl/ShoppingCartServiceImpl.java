@@ -13,6 +13,7 @@ import com.onlinebookstore.model.User;
 import com.onlinebookstore.repository.book.BookRepository;
 import com.onlinebookstore.repository.cart.CartItemRepository;
 import com.onlinebookstore.repository.cart.ShoppingCartRepository;
+import com.onlinebookstore.repository.user.UserRepository;
 import com.onlinebookstore.service.ShoppingCartService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     private final BookRepository bookRepository;
     private final ShoppingCartMapper shoppingCartMapper;
     private final CartItemMapper cartItemMapper;
+    private final UserRepository userRepository;
 
     @Override
     public void createShoppingCartForUser(User user) {
@@ -35,10 +37,24 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
+    public boolean isCartItemBelongsToUser(Long cartItemId, Long userId) {
+        return cartItemRepository.findById(cartItemId)
+                .map(cartItem -> cartItem.getShoppingCart().getUser().getId().equals(userId))
+                .orElse(false);
+    }
+
+    @Override
     public ShoppingCartDto getShoppingCartByUserId(Long userId) {
         ShoppingCart shoppingCart = shoppingCartRepository.findByUserId(userId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Can't get shopping cart for user with id: " + userId));
+                .orElseGet(() -> {
+                    User user = userRepository.findById(userId)
+                            .orElseThrow(() -> new EntityNotFoundException(
+                                "User with id " + userId + " not found"));
+                    createShoppingCartForUser(user);
+                    return shoppingCartRepository.findByUserId(userId)
+                            .orElseThrow(()
+                                    -> new IllegalStateException("Failed to create shopping cart"));
+                });
         return shoppingCartMapper.toDto(shoppingCart);
     }
 
@@ -57,14 +73,14 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         cartItemRepository.save(cartItem);
         shoppingCart.getCartItems().add(cartItem);
         shoppingCartRepository.save(shoppingCart);
-        return getShoppingCartByUserId(userId);
+        return shoppingCartMapper.toDto(shoppingCart);
     }
 
     @Override
     public ShoppingCartDto updateCartItem(Long cartItemId, CartItemUpdateDto updateDto) {
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new EntityNotFoundException(
-                "Can't find cart with id: " + cartItemId));
+                "Can't find cart item with id: " + cartItemId));
         cartItemMapper.updateItemFromDto(updateDto, cartItem);
         cartItemRepository.save(cartItem);
         ShoppingCart shoppingCart = cartItem.getShoppingCart();
@@ -73,6 +89,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public void removeCartItem(Long cartItemId) {
+        if (!shoppingCartRepository.existsById(cartItemId)) {
+            throw new EntityNotFoundException("Item with id: " + cartItemId + " doesn't exist");
+        }
         cartItemRepository.deleteById(cartItemId);
     }
 }

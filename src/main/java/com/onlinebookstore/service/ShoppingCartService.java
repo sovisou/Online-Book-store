@@ -15,4 +15,6 @@ public interface ShoppingCartService {
     void removeCartItem(Long cartItemId);
 
     void createShoppingCartForUser(User user);
+
+    boolean isCartItemBelongsToUser(Long cartItemId, Long userId);
 }
