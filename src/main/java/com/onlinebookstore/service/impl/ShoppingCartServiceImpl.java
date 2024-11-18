@@ -30,10 +30,10 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     private final UserRepository userRepository;
 
     @Override
-    public void createShoppingCartForUser(User user) {
+    public ShoppingCart createShoppingCartForUser(User user) {
         ShoppingCart shoppingCart = new ShoppingCart();
         shoppingCart.setUser(user);
-        shoppingCartRepository.save(shoppingCart);
+        return shoppingCartRepository.save(shoppingCart);
     }
 
     @Override
@@ -45,16 +45,10 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public ShoppingCartDto getShoppingCartByUserId(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new EntityNotFoundException("Can't find user with id: " + userId));
         ShoppingCart shoppingCart = shoppingCartRepository.findByUserId(userId)
-                .orElseGet(() -> {
-                    User user = userRepository.findById(userId)
-                            .orElseThrow(() -> new EntityNotFoundException(
-                                "User with id " + userId + " not found"));
-                    createShoppingCartForUser(user);
-                    return shoppingCartRepository.findByUserId(userId)
-                            .orElseThrow(()
-                                    -> new IllegalStateException("Failed to create shopping cart"));
-                });
+                .orElseGet(() -> createShoppingCartForUser(user));
         return shoppingCartMapper.toDto(shoppingCart);
     }
 

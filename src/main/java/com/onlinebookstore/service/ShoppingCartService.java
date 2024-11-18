@@ -3,6 +3,7 @@ package com.onlinebookstore.service;
 import com.onlinebookstore.dto.cart.CartItemUpdateDto;
 import com.onlinebookstore.dto.cart.CreateCartItemRequestDto;
 import com.onlinebookstore.dto.cart.ShoppingCartDto;
+import com.onlinebookstore.model.ShoppingCart;
 import com.onlinebookstore.model.User;
 
 public interface ShoppingCartService {
@@ -14,7 +15,7 @@ public interface ShoppingCartService {
 
     void removeCartItem(Long cartItemId);
 
-    void createShoppingCartForUser(User user);
+    ShoppingCart createShoppingCartForUser(User user);
 
     boolean isCartItemBelongsToUser(Long cartItemId, Long userId);
 }
