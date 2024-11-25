@@ -7,5 +7,4 @@ import lombok.Data;
 public class CreateOrderRequestDto {
     @NotBlank
     private String shoppingAddress;
-
 }

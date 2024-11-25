@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,17 +37,17 @@ public class OrderController {
 
     @GetMapping
     @Operation(summary = "Retrieve user's order history")
-    public List<OrderDto> getAllOrders(Authentication authentication) {
+    public List<OrderDto> getAllOrders(Authentication authentication, Pageable pageable) {
         Long userId = extractUserId(authentication);
-        return orderService.findAllOrders(userId);
+        return orderService.findAllOrders(userId, pageable);
     }
 
     @PatchMapping("/{id}")
     @Operation(summary = "Update order status")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public OrderDto updateOrderStatus(@PathVariable Long orderId,
-                                      @RequestBody OrderUpdateDto updateDto) {
-        return orderService.updateOrderStatus(orderId, updateDto);
+    public OrderDto updateOrderStatus(@PathVariable Long id,
+                                      @RequestBody @Valid OrderUpdateDto updateDto) {
+        return orderService.updateOrderStatus(id, updateDto);
     }
 
     @GetMapping("/{orderId}/items")

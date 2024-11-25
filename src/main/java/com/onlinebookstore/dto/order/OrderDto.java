@@ -15,6 +15,4 @@ public class OrderDto {
     private LocalDateTime orderDate;
     private String shippingAddress;
     private Set<OrderItemDto> orderItems;
-
 }
-
