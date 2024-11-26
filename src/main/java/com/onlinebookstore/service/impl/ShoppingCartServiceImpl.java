@@ -44,6 +44,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
+    @Transactional
     public ShoppingCartDto getShoppingCartByUserId(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new EntityNotFoundException("Can't find user with id: " + userId));

@@ -46,8 +46,8 @@ public class ShoppingCartController {
     }
 
     @PutMapping("items/{cartItemId}")
-    @Operation(summary = "Update category by id",
-            description = "Update category info by its identifier")
+    @Operation(summary = "Update cart by id",
+            description = "Update shopping cart info by its identifier")
     public ShoppingCartDto updateCartItemsQuantity(@PathVariable Long cartItemId,
                                       @RequestBody @Valid CartItemUpdateDto updateDto,
                                                    Authentication authentication) {
