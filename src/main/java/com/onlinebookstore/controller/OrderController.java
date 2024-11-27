@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -37,7 +38,7 @@ public class OrderController {
 
     @GetMapping
     @Operation(summary = "Retrieve user's order history")
-    public List<OrderDto> getAllOrders(Authentication authentication, Pageable pageable) {
+    public Page<OrderDto> getAllOrders(Authentication authentication, Pageable pageable) {
         Long userId = extractUserId(authentication);
         return orderService.findAllOrders(userId, pageable);
     }

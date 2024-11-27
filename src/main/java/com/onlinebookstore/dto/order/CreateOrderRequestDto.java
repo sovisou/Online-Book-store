@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 public class CreateOrderRequestDto {
     @NotBlank
-    private String shoppingAddress;
+    private String shippingAddress;
 }
