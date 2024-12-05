@@ -5,12 +5,13 @@ import com.onlinebookstore.dto.order.OrderDto;
 import com.onlinebookstore.dto.order.OrderItemDto;
 import com.onlinebookstore.dto.order.OrderUpdateDto;
 import java.util.List;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface OrderService {
     OrderDto createOrder(Long userId, CreateOrderRequestDto requestDto);
 
-    List<OrderDto> findAllOrders(Long userId, Pageable pageable);
+    Page<OrderDto> findAllOrders(Long userId, Pageable pageable);
 
     OrderDto updateOrderStatus(Long orderId, OrderUpdateDto updateDto);
 

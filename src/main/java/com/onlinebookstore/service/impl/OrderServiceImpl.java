@@ -6,6 +6,7 @@ import com.onlinebookstore.dto.order.OrderItemDto;
 import com.onlinebookstore.dto.order.OrderUpdateDto;
 import com.onlinebookstore.enums.Status;
 import com.onlinebookstore.exception.EntityNotFoundException;
+import com.onlinebookstore.exception.OrderProcessingException;
 import com.onlinebookstore.mapper.OrderItemMapper;
 import com.onlinebookstore.mapper.OrderMapper;
 import com.onlinebookstore.model.CartItem;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -47,7 +49,8 @@ public class OrderServiceImpl implements OrderService {
                 () -> new EntityNotFoundException("Can't find shopping cart for user with id: "
                         + userId));
         if (shoppingCart.getCartItems().isEmpty()) {
-            throw new EntityNotFoundException("Shopping cart is empty for user with id: " + userId);
+            throw new OrderProcessingException("Shopping cart is empty for user with id: "
+                    + userId);
         }
         Order order = createOrderFromCart(user, shoppingCart, requestDto);
         orderRepository.save(order);
@@ -56,13 +59,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public List<OrderDto> findAllOrders(Long userId, Pageable pageable) {
+    public Page<OrderDto> findAllOrders(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new EntityNotFoundException("Can't find user with id: " + userId));
-        List<Order> orders = orderRepository.findAllByUser(user);
-        return orders.stream()
-                .map(orderMapper::toDto)
-                .toList();
+        Page<Order> orders = orderRepository.findAllByUser(user, pageable);
+        return orders.map(orderMapper::toDto);
     }
 
     @Override
@@ -94,7 +95,7 @@ public class OrderServiceImpl implements OrderService {
         order.setUser(user);
         order.setStatus(Status.PENDING);
         order.setOrderDate(LocalDateTime.now());
-        order.setShippingAddress(requestDto.getShoppingAddress());
+        order.setShippingAddress(requestDto.getShippingAddress());
         Set<OrderItem> orderItems = shoppingCart.getCartItems().stream()
                 .map(cartItem -> createOrderItem(cartItem, order))
                 .collect(Collectors.toSet());

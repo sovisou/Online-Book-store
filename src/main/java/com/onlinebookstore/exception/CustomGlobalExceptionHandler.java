@@ -53,6 +53,11 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
         return objectResponseEntity(HttpStatus.CONFLICT, ex.getMessage());
     }
 
+    @ExceptionHandler(OrderProcessingException.class)
+    protected ResponseEntity<Object> orderProcessingException(OrderProcessingException ex) {
+        return objectResponseEntity(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
     private ResponseEntity<Object> objectResponseEntity(HttpStatus status, String message) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());

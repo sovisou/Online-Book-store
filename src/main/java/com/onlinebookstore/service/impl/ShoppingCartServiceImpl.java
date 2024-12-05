@@ -37,6 +37,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
+    @Transactional
     public boolean isCartItemBelongsToUser(Long cartItemId, Long userId) {
         return cartItemRepository.findById(cartItemId)
                 .map(cartItem -> cartItem.getShoppingCart().getUser().getId().equals(userId))
@@ -72,6 +73,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
+    @Transactional
     public ShoppingCartDto updateCartItem(Long cartItemId, CartItemUpdateDto updateDto) {
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new EntityNotFoundException(
