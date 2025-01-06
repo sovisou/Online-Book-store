@@ -4,6 +4,7 @@ import com.onlinebookstore.dto.book.BookDto;
 import com.onlinebookstore.dto.book.BookDtoWithoutCategoryIds;
 import com.onlinebookstore.dto.book.BookSearchParameters;
 import com.onlinebookstore.dto.book.CreateBookRequestDto;
+import com.onlinebookstore.dto.book.UpdateBookDto;
 import com.onlinebookstore.exception.EntityNotFoundException;
 import com.onlinebookstore.mapper.BookMapper;
 import com.onlinebookstore.model.Book;
@@ -49,10 +50,10 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookDto updateById(Long id, CreateBookRequestDto requestDto) {
+    public BookDto updateById(Long id, UpdateBookDto updateBookDto) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Can't find book by id: " + id));
-        bookMapper.updateBookFromDto(requestDto, book);
+        bookMapper.updateBookFromDto(updateBookDto, book);
         bookRepository.save(book);
         return bookMapper.toDto(book);
     }

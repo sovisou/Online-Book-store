@@ -4,6 +4,7 @@ import com.onlinebookstore.config.MapperConfig;
 import com.onlinebookstore.dto.book.BookDto;
 import com.onlinebookstore.dto.book.BookDtoWithoutCategoryIds;
 import com.onlinebookstore.dto.book.CreateBookRequestDto;
+import com.onlinebookstore.dto.book.UpdateBookDto;
 import com.onlinebookstore.model.Book;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -15,9 +16,15 @@ public interface BookMapper {
 
     Book toModel(CreateBookRequestDto requestDto);
 
-    void updateBookFromDto(CreateBookRequestDto requestDto, @MappingTarget Book book);
+    void updateBookFromDto(UpdateBookDto updateBookDto, @MappingTarget Book book);
 
     BookDtoWithoutCategoryIds toDtoWithoutCategories(Book book);
+
+    @AfterMapping
+    default void setCategoryIdsForUpdate(@MappingTarget Book book, UpdateBookDto updateBookDto) {
+        book.setCategories(updateBookDto.getCategories());
+
+    }
 
     @AfterMapping
     default void setCategoryIds(@MappingTarget BookDto bookDto, Book book) {

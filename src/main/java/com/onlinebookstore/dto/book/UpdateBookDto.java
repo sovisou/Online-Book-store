@@ -1,14 +1,16 @@
 package com.onlinebookstore.dto.book;
 
+import com.onlinebookstore.model.Category;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.util.Set;
 import lombok.Data;
 
 @Data
-public class CreateBookRequestDto {
+public class UpdateBookDto {
     @NotBlank
     @Size(min = 1, max = 100)
     private String title;
@@ -26,4 +28,5 @@ public class CreateBookRequestDto {
     private String description;
     @NotBlank
     private String coverImage;
+    private Set<Category> categories;
 }
