@@ -89,10 +89,10 @@ public class CategoryControllerTest {
         requestDto.setName(FIRST_CATEGORY_NAME);
         requestDto.setDescription(DESCRIPTION);
 
-        CategoryDto expected = new CategoryDto();
-        expected.setName(FIRST_CATEGORY_NAME);
-        expected.setId(CATEGORY_ID);
-        expected.setDescription(DESCRIPTION);
+        CategoryDto expectedCategoryDto = new CategoryDto();
+        expectedCategoryDto.setName(FIRST_CATEGORY_NAME);
+        expectedCategoryDto.setId(CATEGORY_ID);
+        expectedCategoryDto.setDescription(DESCRIPTION);
 
         String json = objectMapper.writeValueAsString(requestDto);
 
@@ -106,7 +106,7 @@ public class CategoryControllerTest {
                 result.getResponse().getContentAsString(), CategoryDto.class);
 
         assertNotNull(actual);
-        reflectionEquals(expected, actual);
+        reflectionEquals(expectedCategoryDto, actual);
     }
 
     @WithMockUser(username = "user")
@@ -118,11 +118,13 @@ public class CategoryControllerTest {
         firstCategoryDto.setName("Fiction");
         firstCategoryDto.setDescription("Books that contain content"
                 + " that is invented or imagined, not factual.");
+
         CategoryDto secondCategoryDto = new CategoryDto();
         secondCategoryDto.setId(2L);
         secondCategoryDto.setName("Non-Fiction");
         secondCategoryDto.setDescription("Books that are based"
                 + " on factual information or real events.");
+
         CategoryDto thirdCategoryDto = new CategoryDto();
         thirdCategoryDto.setId(3L);
         thirdCategoryDto.setName("Fantasy");
@@ -151,10 +153,10 @@ public class CategoryControllerTest {
         requestDto.setName(FIRST_CATEGORY_NAME);
         requestDto.setDescription(DESCRIPTION);
 
-        CategoryDto expected = new CategoryDto();
-        expected.setName(FIRST_CATEGORY_NAME);
-        expected.setId(CATEGORY_ID);
-        expected.setDescription(DESCRIPTION);
+        CategoryDto expectedCategoryDto = new CategoryDto();
+        expectedCategoryDto.setName(FIRST_CATEGORY_NAME);
+        expectedCategoryDto.setId(CATEGORY_ID);
+        expectedCategoryDto.setDescription(DESCRIPTION);
 
         MvcResult result = mockMvc.perform(get("/categories/{id}", CATEGORY_ID)
                                 .contentType(MediaType.APPLICATION_JSON))
@@ -165,7 +167,7 @@ public class CategoryControllerTest {
                 result.getResponse().getContentAsString(), CategoryDto.class
         );
 
-        reflectionEquals(expected, actual);
+        reflectionEquals(expectedCategoryDto, actual);
     }
 
     @WithMockUser(username = "admin", roles = {"ADMIN"})
@@ -176,12 +178,12 @@ public class CategoryControllerTest {
         requestDto.setName(SECOND_CATEGORY_NAME);
         requestDto.setDescription(DESCRIPTION);
 
-        CategoryDto expected = new CategoryDto();
-        expected.setName(SECOND_CATEGORY_NAME);
-        expected.setId(CATEGORY_ID);
-        expected.setDescription(DESCRIPTION);
+        CategoryDto expectedCategoryDto = new CategoryDto();
+        expectedCategoryDto.setName(SECOND_CATEGORY_NAME);
+        expectedCategoryDto.setId(CATEGORY_ID);
+        expectedCategoryDto.setDescription(DESCRIPTION);
 
-        String json = objectMapper.writeValueAsString(expected);
+        String json = objectMapper.writeValueAsString(expectedCategoryDto);
 
         MvcResult result = mockMvc.perform(put("/categories/{id}", CATEGORY_ID)
                                 .content(json)
@@ -193,6 +195,6 @@ public class CategoryControllerTest {
                 result.getResponse().getContentAsString(), CategoryDto.class
         );
 
-        reflectionEquals(expected, actual);
+        reflectionEquals(expectedCategoryDto, actual);
     }
 }

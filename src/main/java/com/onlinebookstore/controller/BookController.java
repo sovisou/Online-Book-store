@@ -4,7 +4,6 @@ import com.onlinebookstore.dto.book.BookDto;
 import com.onlinebookstore.dto.book.BookDtoWithoutCategoryIds;
 import com.onlinebookstore.dto.book.BookSearchParameters;
 import com.onlinebookstore.dto.book.CreateBookRequestDto;
-import com.onlinebookstore.dto.book.UpdateBookDto;
 import com.onlinebookstore.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -65,8 +64,8 @@ public class BookController {
     @Operation(summary = "Update book by id", description = "Update book info by its identifier")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public BookDto updateBook(@PathVariable Long id,
-                              @RequestBody @Valid UpdateBookDto updateBookDto) {
-        return bookService.updateById(id, updateBookDto);
+                              @RequestBody @Valid CreateBookRequestDto bookDto) {
+        return bookService.updateById(id, bookDto);
     }
 
     @GetMapping("/search")

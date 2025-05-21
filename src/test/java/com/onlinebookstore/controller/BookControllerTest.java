@@ -7,40 +7,38 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.testcontainers.shaded.org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onlinebookstore.dto.book.BookDto;
-import com.onlinebookstore.dto.book.BookDtoWithoutCategoryIds;
 import com.onlinebookstore.dto.book.CreateBookRequestDto;
-import com.onlinebookstore.dto.book.UpdateBookDto;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.sql.DataSource;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.shaded.org.apache.commons.lang3.builder.EqualsBuilder;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class BookControllerTest {
@@ -56,8 +54,11 @@ public class BookControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @BeforeAll
-    static void beforeAll(
+    public BookControllerTest() {
+    }
+
+    @BeforeEach
+    void beforeEach(
             @Autowired DataSource dataSource,
             @Autowired WebApplicationContext webApplicationContext
     ) throws SQLException {
@@ -68,20 +69,22 @@ public class BookControllerTest {
         teardown(dataSource);
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
-            ScriptUtils.executeSqlScript(connection,
-                    new ClassPathResource("database/books/add-three-default-books.sql"));
+            ScriptUtils.executeSqlScript(
+                    connection,
+                    new ClassPathResource("database/books/add-three-default-books.sql")
+            );
         }
     }
 
-    @AfterAll
-    static void afterAll(
+    @AfterEach
+    void afterEach(
             @Autowired DataSource dataSource
     ) {
         teardown(dataSource);
     }
 
     @SneakyThrows
-    static void teardown(DataSource dataSource) {
+    void teardown(DataSource dataSource) {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(
@@ -110,6 +113,7 @@ public class BookControllerTest {
         expectedBookDto.setPrice(requestDto.getPrice());
         expectedBookDto.setDescription(requestDto.getDescription());
         expectedBookDto.setCoverImage(requestDto.getCoverImage());
+        expectedBookDto.setCategoriesIds(new HashSet<>());
 
         String jsonRequest = objectMapper.writeValueAsString(requestDto);
 
@@ -121,45 +125,14 @@ public class BookControllerTest {
         BookDto actualBookDto = objectMapper.readValue(result.getResponse().getContentAsString(),
                 BookDto.class);
         assertNotNull(actualBookDto);
-        reflectionEquals(expectedBookDto, actualBookDto);
+        Assertions.assertTrue(EqualsBuilder.reflectionEquals(expectedBookDto, actualBookDto, "id"));
     }
 
     @WithMockUser(username = "user")
     @Test
     @DisplayName("Get all books")
     void getAllBooks_ValidRequestDto_Success() throws Exception {
-        BookDto firstBookDto = new BookDto();
-        firstBookDto.setId(1L);
-        firstBookDto.setTitle("First Book");
-        firstBookDto.setAuthor("Author One");
-        firstBookDto.setIsbn("9781234567890");
-        firstBookDto.setPrice(BigDecimal.valueOf(25.99));
-        firstBookDto.setDescription("This is the first book description");
-        firstBookDto.setCoverImage("first_book_cover.jpg");
-        firstBookDto.setCategories(new HashSet<>());
-        BookDto secondBookDto = new BookDto();
-        secondBookDto.setId(2L);
-        secondBookDto.setTitle("Second Book");
-        secondBookDto.setAuthor("Author Two");
-        secondBookDto.setIsbn("9781234567891");
-        secondBookDto.setPrice(BigDecimal.valueOf(15.49));
-        secondBookDto.setDescription("This is the second book description");
-        secondBookDto.setCoverImage("second_book_cover.jpg");
-        secondBookDto.setCategories(new HashSet<>());
-        BookDto thirdBookDto = new BookDto();
-        thirdBookDto.setId(3L);
-        thirdBookDto.setTitle("Third Book");
-        thirdBookDto.setAuthor("Author Three");
-        thirdBookDto.setIsbn("9781234567892");
-        thirdBookDto.setPrice(BigDecimal.valueOf(18.99));
-        thirdBookDto.setDescription("This is the third book description");
-        thirdBookDto.setCoverImage("third_book_cover.jpg");
-        thirdBookDto.setCategories(new HashSet<>());
-        List<BookDto> expected = new ArrayList<>();
-
-        expected.add(firstBookDto);
-        expected.add(secondBookDto);
-        expected.add(thirdBookDto);
+        List<BookDto> expected = createBooks();
 
         MvcResult result = mockMvc.perform(get("/books")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -183,6 +156,7 @@ public class BookControllerTest {
         expected.setPrice(BOOK_PRICE);
         expected.setDescription(BOOK_DESCRIPTION);
         expected.setCoverImage(BOOK_COVER_IMAGE);
+        expected.setCategoriesIds(Set.of(1L));
 
         MvcResult result = mockMvc.perform(get("/books/{id}", expected.getId())
                         .contentType(MediaType.APPLICATION_JSON))
@@ -190,25 +164,14 @@ public class BookControllerTest {
                 .andReturn();
         BookDto actualBookDto = objectMapper.readValue(result.getResponse().getContentAsByteArray(),
                 BookDto.class);
-        reflectionEquals(expected, actualBookDto);
+        assertEquals(expected.getId(), actualBookDto.getId());
     }
 
     @WithMockUser(username = "user")
     @Test
     @DisplayName("Search books by id")
     void searchBooks_ValidRequest_Success() throws Exception {
-        BookDto requestDto = new BookDto();
-        requestDto.setId(1L);
-        requestDto.setTitle(FIRST_BOOK_TITLE);
-        requestDto.setAuthor(BOOK_AUTHOR_NAME);
-        requestDto.setIsbn(FIRST_BOOK_ISBN);
-        requestDto.setPrice(BOOK_PRICE);
-        requestDto.setDescription(BOOK_DESCRIPTION);
-        requestDto.setCoverImage(BOOK_COVER_IMAGE);
-        requestDto.setCategories(new HashSet<>());
-        Pageable pageable = PageRequest.of(0, 20);
-
-        Page<BookDto> expected = new PageImpl<>(List.of(requestDto), pageable, 1);
+        List<BookDto> expected = createBooks();
 
         MvcResult result = mockMvc.perform(get("/books/search")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -216,34 +179,38 @@ public class BookControllerTest {
                 .andReturn();
 
         String actual = result.getResponse().getContentAsString();
-
-        reflectionEquals(expected, actual);
+        List<BookDto> actualBookDtos = objectMapper.readValue(actual, new TypeReference<>() {
+        });
+        assertNotNull(actualBookDtos);
+        Assertions.assertEquals(3, actualBookDtos.size());
+        Assertions.assertEquals(expected.get(0), actualBookDtos.get(0));
     }
 
     @WithMockUser(username = "admin", roles = "ADMIN")
     @Test
     @DisplayName("Update book info by its identifier")
     void updateBook_ValidRequest_Success() throws Exception {
-        UpdateBookDto requestDto = new UpdateBookDto();
+        CreateBookRequestDto requestDto = new CreateBookRequestDto();
         requestDto.setTitle(FIRST_BOOK_TITLE);
         requestDto.setAuthor(BOOK_AUTHOR_NAME);
         requestDto.setIsbn(SECOND_BOOK_ISBN);
         requestDto.setPrice(BOOK_PRICE);
         requestDto.setDescription(BOOK_DESCRIPTION);
         requestDto.setCoverImage(BOOK_COVER_IMAGE);
-        requestDto.setCategories(new HashSet<>());
+        requestDto.setCategoryIds(new HashSet<>());
 
-        BookDto expected = new BookDto();
-        expected.setTitle(requestDto.getTitle());
-        expected.setAuthor(requestDto.getAuthor());
-        expected.setIsbn(requestDto.getIsbn());
-        expected.setPrice(requestDto.getPrice());
-        expected.setDescription(requestDto.getDescription());
-        expected.setCoverImage(requestDto.getCoverImage());
-        expected.setCategories(requestDto.getCategories());
+        BookDto expectedBookDto = new BookDto();
+        expectedBookDto.setTitle(requestDto.getTitle());
+        expectedBookDto.setAuthor(requestDto.getAuthor());
+        expectedBookDto.setIsbn(requestDto.getIsbn());
+        expectedBookDto.setPrice(requestDto.getPrice());
+        expectedBookDto.setDescription(requestDto.getDescription());
+        expectedBookDto.setCoverImage(requestDto.getCoverImage());
+        expectedBookDto.setCategoriesIds(requestDto.getCategoryIds());
+
         Long bookId = 1L;
 
-        String json = objectMapper.writeValueAsString(expected);
+        String json = objectMapper.writeValueAsString(requestDto);
 
         MvcResult result = mockMvc.perform(put("/books/{id}", bookId)
                                 .content(json)
@@ -254,33 +221,50 @@ public class BookControllerTest {
         BookDto actual = objectMapper.readValue(
                 result.getResponse().getContentAsString(), BookDto.class);
 
-        reflectionEquals(expected, actual);
+        Assertions.assertTrue(EqualsBuilder.reflectionEquals(expectedBookDto, actual, "id"));
     }
 
-    @WithMockUser(username = "user")
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     @Test
-    @DisplayName("Get a list of books by its category identifier")
-    public void getBooksByCategoryId_GivenDto_Success() throws Exception {
-        Long categoryId = 1L;
-        BookDtoWithoutCategoryIds requestDto = new BookDtoWithoutCategoryIds();
-        requestDto.setId(1L);
-        requestDto.setTitle(FIRST_BOOK_TITLE);
-        requestDto.setAuthor(BOOK_AUTHOR_NAME);
-        requestDto.setIsbn(FIRST_BOOK_ISBN);
-        requestDto.setPrice(BOOK_PRICE);
-        requestDto.setDescription(BOOK_DESCRIPTION);
-        requestDto.setCoverImage(BOOK_COVER_IMAGE);
-        Pageable pageable = PageRequest.of(0, 20);
+    @DisplayName("Delete book by id")
+    public void deleteBookById_GivenDto_Success() throws Exception {
+        Long bookId = 1L;
+        mockMvc.perform(MockMvcRequestBuilders.delete("/books/{id}", bookId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
 
-        Page<BookDtoWithoutCategoryIds> expected = new PageImpl<>(List.of(requestDto), pageable, 1);
+    private List<BookDto> createBooks() {
+        BookDto firstBookDto = new BookDto();
+        firstBookDto.setId(1L);
+        firstBookDto.setTitle("First Book");
+        firstBookDto.setAuthor("Author One");
+        firstBookDto.setIsbn("9781234567890");
+        firstBookDto.setPrice(BigDecimal.valueOf(25.99));
+        firstBookDto.setDescription("This is the first book description");
+        firstBookDto.setCoverImage("first_book_cover.jpg");
+        firstBookDto.setCategoriesIds(new HashSet<>());
 
-        MvcResult result = mockMvc.perform(get("/books/{id}/books", categoryId)
-                                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
+        BookDto secondBookDto = new BookDto();
+        secondBookDto.setId(2L);
+        secondBookDto.setTitle("Second Book");
+        secondBookDto.setAuthor("Author Two");
+        secondBookDto.setIsbn("9781234567891");
+        secondBookDto.setPrice(BigDecimal.valueOf(15.49));
+        secondBookDto.setDescription("This is the second book description");
+        secondBookDto.setCoverImage("second_book_cover.jpg");
+        secondBookDto.setCategoriesIds(new HashSet<>());
 
-        String actual = result.getResponse().getContentAsString();
+        BookDto thirdBookDto = new BookDto();
+        thirdBookDto.setId(3L);
+        thirdBookDto.setTitle("Third Book");
+        thirdBookDto.setAuthor("Author Three");
+        thirdBookDto.setIsbn("9781234567892");
+        thirdBookDto.setPrice(BigDecimal.valueOf(18.99));
+        thirdBookDto.setDescription("This is the third book description");
+        thirdBookDto.setCoverImage("third_book_cover.jpg");
+        thirdBookDto.setCategoriesIds(new HashSet<>());
 
-        reflectionEquals(expected, actual);
+        return List.of(firstBookDto, secondBookDto, thirdBookDto);
     }
 }

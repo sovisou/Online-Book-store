@@ -25,6 +25,12 @@ import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 public class CategoryServiceTest {
+    private static final Long CATEGORY_ID = 1L;
+    private static final Long SECOND_CATEGORY_ID = 2L;
+    private static final String DESCRIPTION = "Books content is very dramatically.";
+    private static final String SECOND_CATEGORY_NAME = "Melodrama";
+    private static final String FIRST_CATEGORY_NAME = "Drama";
+
     @Mock
     private CategoryRepository categoryRepository;
     @Mock
@@ -34,64 +40,108 @@ public class CategoryServiceTest {
 
     @Test
     public void save_validCreateCategoryRequestDto_returnCategoryDto() {
-        CreateCategoryRequestDto createCategoryRequestDto = new CreateCategoryRequestDto();
         Category category = new Category();
+        category.setName(FIRST_CATEGORY_NAME);
+        category.setDescription(DESCRIPTION);
+
         CategoryDto expectedCategoryDto = new CategoryDto();
-        when(categoryMapper.toEntity(createCategoryRequestDto)).thenReturn(category);
+        expectedCategoryDto.setId(CATEGORY_ID);
+        expectedCategoryDto.setName(FIRST_CATEGORY_NAME);
+        expectedCategoryDto.setDescription(DESCRIPTION);
+        CreateCategoryRequestDto categoryRequestDto = new CreateCategoryRequestDto();
+
+        when(categoryMapper.toEntity(categoryRequestDto)).thenReturn(category);
         when(categoryRepository.save(category)).thenReturn(category);
         when(categoryMapper.toDto(category)).thenReturn(expectedCategoryDto);
-        CategoryDto result = categoryService.save(createCategoryRequestDto);
+
+        CategoryDto result = categoryService.save(categoryRequestDto);
         assertEquals(expectedCategoryDto, result);
-        verify(categoryMapper, times(1)).toEntity(createCategoryRequestDto);
+        verify(categoryMapper, times(1)).toEntity(categoryRequestDto);
         verify(categoryRepository, times(1)).save(category);
-        verify(categoryMapper, times(1)).toEntity(createCategoryRequestDto);
+        verify(categoryMapper, times(1)).toEntity(categoryRequestDto);
     }
 
     @Test
     public void getById_validId_returnCategoryDto() {
-        Long id = 1L;
         Category category = new Category();
+        category.setName(FIRST_CATEGORY_NAME);
+        category.setDescription(DESCRIPTION);
+
         CategoryDto expectedCategoryDto = new CategoryDto();
-        when(categoryRepository.findById(id)).thenReturn(Optional.of(category));
+        expectedCategoryDto.setId(CATEGORY_ID);
+        expectedCategoryDto.setName(FIRST_CATEGORY_NAME);
+        expectedCategoryDto.setDescription(DESCRIPTION);
+
+        when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.of(category));
         when(categoryMapper.toDto(category)).thenReturn(expectedCategoryDto);
-        CategoryDto result = categoryService.getById(id);
+
+        CategoryDto result = categoryService.getById(CATEGORY_ID);
         assertEquals(expectedCategoryDto, result);
-        verify(categoryRepository, times(1)).findById(id);
+        verify(categoryRepository, times(1)).findById(CATEGORY_ID);
         verify(categoryMapper, times(1)).toDto(category);
     }
 
     @Test
     public void getAllCategories_validPageable_returnCategoryDto() {
-        Category category1 = new Category();
-        Category category2 = new Category();
-        List<Category> categories = List.of(category1, category2);
-        CategoryDto expectedCategoryDto1 = new CategoryDto();
-        CategoryDto expectedCategoryDto2 = new CategoryDto();
+        Category fisrtCategory = new Category();
+        fisrtCategory.setId(CATEGORY_ID);
+        fisrtCategory.setName(FIRST_CATEGORY_NAME);
+        fisrtCategory.setDescription(DESCRIPTION);
+
+        Category secondCategory = new Category();
+        secondCategory.setId(SECOND_CATEGORY_ID);
+        secondCategory.setName(FIRST_CATEGORY_NAME);
+        secondCategory.setDescription(DESCRIPTION);
+
+        CategoryDto firstExpectedCategory = new CategoryDto();
+        firstExpectedCategory.setId(CATEGORY_ID);
+        firstExpectedCategory.setName(FIRST_CATEGORY_NAME);
+        firstExpectedCategory.setDescription(DESCRIPTION);
+
+        CategoryDto secondExpectedCategory = new CategoryDto();
+        secondExpectedCategory.setId(SECOND_CATEGORY_ID);
+        secondExpectedCategory.setName(SECOND_CATEGORY_NAME);
+        secondExpectedCategory.setDescription(DESCRIPTION);
+        List<Category> categories = List.of(fisrtCategory, secondCategory);
+
         Pageable pageable = PageRequest.of(0, 10);
         Page<Category> categoryPage = new PageImpl<>(categories, pageable, 10);
-        when(categoryMapper.toDto(category1)).thenReturn(expectedCategoryDto1);
-        when(categoryMapper.toDto(category2)).thenReturn(expectedCategoryDto2);
+
+        when(categoryMapper.toDto(fisrtCategory)).thenReturn(firstExpectedCategory);
+        when(categoryMapper.toDto(secondCategory)).thenReturn(secondExpectedCategory);
         when(categoryRepository.findAll(pageable)).thenReturn(categoryPage);
-        Page<CategoryDto> expectedCategories = new PageImpl<>(List.of(expectedCategoryDto1,
-                expectedCategoryDto2), pageable, 10);
+        Page<CategoryDto> expectedCategories = new PageImpl<>(List.of(firstExpectedCategory,
+                secondExpectedCategory), pageable, 10);
+
         Page<CategoryDto> result = categoryService.findAll(pageable);
         assertEquals(expectedCategories, result);
         verify(categoryRepository, times(1)).findAll(pageable);
-        verify(categoryMapper, times(1)).toDto(category1);
-        verify(categoryMapper, times(1)).toDto(category2);
+        verify(categoryMapper, times(1)).toDto(fisrtCategory);
+        verify(categoryMapper, times(1)).toDto(secondCategory);
     }
 
     @Test
     public void update_validCreateCategoryRequestDto_returnCategoryDto() {
-        Long categoryId = 1L;
         CreateCategoryRequestDto createCategoryRequestDto = new CreateCategoryRequestDto();
+        createCategoryRequestDto.setName(FIRST_CATEGORY_NAME);
+        createCategoryRequestDto.setDescription(DESCRIPTION);
+
         Category category = new Category();
+        category.setId(CATEGORY_ID);
+        category.setName(FIRST_CATEGORY_NAME);
+        category.setDescription(DESCRIPTION);
+
         CategoryDto expectedCategoryDto = new CategoryDto();
-        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
+        expectedCategoryDto.setId(CATEGORY_ID);
+        expectedCategoryDto.setName(FIRST_CATEGORY_NAME);
+        expectedCategoryDto.setDescription(DESCRIPTION);
+
+        when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.of(category));
         when(categoryMapper.toDto(category)).thenReturn(expectedCategoryDto);
-        CategoryDto result = categoryService.update(categoryId, createCategoryRequestDto);
+
+        CategoryDto result = categoryService.update(CATEGORY_ID, createCategoryRequestDto);
         assertEquals(expectedCategoryDto, result);
-        verify(categoryRepository, times(1)).findById(categoryId);
+        verify(categoryRepository, times(1)).findById(CATEGORY_ID);
         verify(categoryMapper, times(1)).toDto(category);
     }
 }
