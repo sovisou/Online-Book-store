@@ -1,0 +1,1 @@
+DELETE FROM books WHERE isbn = '43546576879';

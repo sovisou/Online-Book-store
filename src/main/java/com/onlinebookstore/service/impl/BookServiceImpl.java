@@ -7,10 +7,15 @@ import com.onlinebookstore.dto.book.CreateBookRequestDto;
 import com.onlinebookstore.exception.EntityNotFoundException;
 import com.onlinebookstore.mapper.BookMapper;
 import com.onlinebookstore.model.Book;
+import com.onlinebookstore.model.Category;
 import com.onlinebookstore.repository.book.BookRepository;
 import com.onlinebookstore.repository.book.BookSpecificationBuilder;
+import com.onlinebookstore.repository.category.CategoryRepository;
 import com.onlinebookstore.service.BookService;
+import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -19,6 +24,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
+    private final CategoryRepository categoryRepository;
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
     private final BookSpecificationBuilder bookSpecificationBuilder;
@@ -29,6 +35,7 @@ public class BookServiceImpl implements BookService {
         return bookMapper.toDto(bookRepository.save(book));
     }
 
+    @Transactional
     @Override
     public BookDto findById(Long id) {
         Book book = bookRepository.findById(id)
@@ -52,6 +59,12 @@ public class BookServiceImpl implements BookService {
     public BookDto updateById(Long id, CreateBookRequestDto requestDto) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Can't find book by id: " + id));
+        Set<Category> categories = requestDto.getCategoryIds().stream()
+                .map(categoryId -> categoryRepository.findById(categoryId)
+                        .orElseThrow(() -> new EntityNotFoundException("Can't find category by id: "
+                                + categoryId)))
+                .collect(Collectors.toSet());
+        book.setCategories(categories);
         bookMapper.updateBookFromDto(requestDto, book);
         bookRepository.save(book);
         return bookMapper.toDto(book);
